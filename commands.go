@@ -476,6 +476,8 @@ func (mtb *MoneroTipBot) parseCommandBALANCE() error {
 
 	if balances.PerSubaddress == nil {
 		msg.Text = "Account has no funds. No balance to show."
+		mtb.reply(msg)
+		msg.Text = useraccount.BaseAddress
 		return mtb.reply(msg)
 	}
 
