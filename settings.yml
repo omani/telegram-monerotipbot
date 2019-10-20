@@ -1,0 +1,159 @@
+# Telegram Bot Settings
+telegram_bot_token: ""
+rpcchannel_uri: "tcp://127.0.0.1:5555"
+blockexplorer_url: "https://xmrchain.net/tx/"
+
+BOT_NAME: ""
+DEV_DONATION_ADDRESS: "88jspkqPmvvc9L3LovdhjoCW2eBSKk4VNTsrdWqB4CYdBfKRWH5yL39bE6NP5Di2Wgix1cxBgKMAiXMbUwCBY3Dk2WvwSSA"
+MIN_TIP_AMOUNT: 0.00042
+GIVEAWAY_FILE: "giveaways.json" # absolute path will also work
+BROADCAST_NOTIFICATION_INTERVAL: 10
+LOGFILE: "monerotipbot.log" # this must be set! regardless if you use logging.
+
+# XMRTO service
+xmrto_website: "https://xmr.to"
+xmrto_btc_blockexplorer: "https://www.blockchain.com/btc/tx"
+
+# Monero Wallet RPC Settings
+monero_rpc_daemon_url: "http://127.0.0.1:6061/json_rpc"
+monero_rpc_daemon_username: ''
+monero_rpc_daemon_password: ''
+IS_STAGENET_WALLET: false
+
+# Statsd Settings (Metrics Logger)
+USE_STATSD: false
+statsd_address: "127.0.0.1:8125"
+statsd_prefix: "mytipbot."
+
+# Bot Helper Messages
+welcome_message: ''
+
+help_message: '<b>Help Menu:</b>
+
+
+/tip <b>username</b> <b>amount</b> <i>message</i>
+
+Tip a user with a certain amount and optionally a messageto send along with the tip. All users who started the bot will be notified upon a tip.
+
+
+/send <b>address</b> <b>amount</b>
+
+Send amount to a regular monero wallet address
+
+
+/balance
+
+Show your balance.
+
+
+/giveaway <b>amount</b>
+
+Make a giveaway within a telegram group.
+
+
+/withdraw <b>address</b>
+
+Withdraw everything from the tip bot wallet to your own wallet address.
+
+
+/generateqr <i>amount</i> <i>description</i>
+
+Generate a QR-Code image with the desired amount and optionally a description to share with others.
+
+You can also paste a QR-Code image into this PM chat with me and I will try to decode it. This way you can make transactions by scanning QR-Codes.
+
+
+/xmrto <i>btc-address</i> <i>amount</i>
+
+Needs no further introduction. Those who know xmr.to will love this. :)
+
+Pay the world with Monero via xmr.to!
+
+
+
+/help <i>command</i>
+
+Show additional information about a specific command.'
+
+help_message_TIP: "/tip <b>username</b> <b>amount</b> <i>message</i>
+
+
+Amount takes no trailing XMR symbol! Tip a user with a certain amount. All users who started the bot will be notified upon a tip.
+
+Optionally you can specify a message to be sent along with the tip. This message will be forwarded to the user if that user has started the bot.
+
+<b>Notice:</b>
+Make sure the telegram user you want to tip actually exists, otherwise the moneros will be gone!!!
+
+
+Unknown users to the bot, will be tipped regardless whether or not they exist in Telegram.
+
+You cannot tip users within the bot PM, who do not have an account in the bot. Those users can only be tipped within a group.
+
+Optionally, you can use the @ sign when giving the username. Exception to this is when you tip on a reply message. Then you don't need a username and only the amount.
+Amount has to be a number. Use decimals if you need fractional amounts (like 0.1)."
+
+help_message_SEND: "/send <b>address</b> <b>amount</b>
+
+
+Amount takes no trailing XMR symbol! Send a certain amount to a regular monero wallet address.
+Amount has to be a number. Use decimals if you need fractional amounts (like 0.1)."
+
+help_message_GIVEAWAY: "/giveaway <b>amount</b>
+
+
+Amount takes no trailing XMR symbol! Make a giveaway within a telegram group.
+
+
+This is a group command. If this bot is in a group and you are a member of that group, you can make a giveaway with the amount you want to give away. The first user in that group who clicks on the 'Claim' button will receive that amount and a tip will happen between the giver (you) and the taker.
+Amount has to be a number. Use decimals if you need fractional amounts (like 0.1)."
+
+help_message_WITHDRAW: "/withdraw <b>address</b>
+
+
+Withdraw everything from the tip bot wallet to your own wallet address.
+
+
+Make sure you double-check the recipient address to make sure you are sending to the right address."
+
+help_message_BALANCE: "/balance
+
+
+Show your current balance. Balance is the total balance.
+
+Unlocked balance is what is free to spend and the number of spent outputs gives you a hint to how many times you can tip.
+
+If balance is locked the output will show the estimated time until unlocked."
+
+help_message_GENERATEQR: "/generateqr <i>amount</i> <i>description</i>
+
+
+Generate a QR-Code image with the desired amount and optionally a description to share with others. The other person can then paste this image into the bot PM and can do a transaction.
+
+
+Every QR-Code image generated will use a new subaccount address to avoid giving away your main wallet address.
+
+
+If you don't specify any parameter, it will generate a QR-Code image with just your subaccount address.
+
+
+Example:
+
+/generateqr 10 thank you for the donation. much appreciated! :)"
+
+
+help_message_XMRTO: "/xmrto <i>btc-address</i> <i>amount</i>
+
+
+This bot implements the API of https://xmr.to and makes it possible to send BTC anywhere by sending XMR to their service.
+
+
+Specify the BTC address you want to send BTC to and the amount. The bot will start an interactive dialog and will guide you through the process.
+
+
+Pass the /xmrto command without any arguments to see the order parameters of xmr.to.
+
+
+<b>Highlight</b>:
+
+Upload a BITCOIN QR-Code with a correct URI (that is, with an amount encoded) and tag (add a caption to) the image with 'xmr.to' (without the quotes) before uploading it to the bot PM."
