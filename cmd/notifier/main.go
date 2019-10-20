@@ -17,7 +17,7 @@ import (
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
 	"github.com/spf13/viper"
 
-	monerotipbot "github.com/omani/go-telegram-monerotipbot"
+	monerotipbot "github.com/omani/telegram-monerotipbot"
 	zmq "github.com/pebbe/zmq4"
 	"github.com/sirupsen/logrus"
 )
