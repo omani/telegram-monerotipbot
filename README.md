@@ -386,6 +386,9 @@ If you have questions or trouble feel free to create an issue in this repository
 
 If you use this bot in your own group, people trust you by depositing their Monero to your wallet. Do not abuse their trust!
 
+- If you create a new wallet, write down and save away the mnemonic seed of that wallet.
+- Do regular backups of the wallet. You can broadcast a "scheduled maintenance" message to all users. On that date, stop the bot, stop the wallet-rpc daemon, and make a backup of the wallet file and store it somewhere safe. Restart all services again after that.
+
 ## Contribution
 * You can fork this, extend it and contribute back.
 * You can contribute with pull requests.
