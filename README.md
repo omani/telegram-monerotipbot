@@ -327,7 +327,7 @@ The structure of the message of your help menu when a user invokes the `/help xm
 This was everything you can specify in your `settings.yml`. Adjust to your needs.
 
 ### BotFather Setup (Commands)
-When creating your new bot as a Monero Tip Bot, remember to set up the commands of the new bot.
+When creating your new bot, remember to set up the commands of the new bot.
 
 You must at least have these commands, paste them into the BotFather PM when asked to specify the commands:
 ```
