@@ -214,6 +214,9 @@ func (mtb *MoneroTipBot) parseCommandTIP() error {
 		Destinations: destinations,
 	})
 	if err != nil {
+		if !mtb.message.Chat.IsPrivate() {
+			msg.ChatID = mtb.message.Chat.ID
+		}
 		msg.Text = fmt.Sprintf("Tip Error: %s", err)
 		return mtb.reply(msg)
 	}
@@ -393,6 +396,9 @@ func (mtb *MoneroTipBot) parseCommandGIVEAWAY() error {
 	}
 
 	if useraccount.UnlockedBalance < wallet.Float64ToXMR(parseamount) {
+		if !mtb.message.Chat.IsPrivate() {
+			msg.ChatID = mtb.message.Chat.ID
+		}
 		msg.Text = "Error: Not enough unlocked money."
 		return mtb.reply(msg)
 	}
