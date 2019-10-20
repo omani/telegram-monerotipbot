@@ -5,7 +5,7 @@ go-telegram-monerotipbot
 <img src="https://github.com/omani/go-telegram-monerotipbot/raw/master/assets/img/icon.png" alt="MoneroTipBot" width="200" />
 </p>
 
-A telegram Monero tip bot written in go.
+A Telegram Monero tip bot written in go.
 
 ___
 ## Preface
