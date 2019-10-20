@@ -426,7 +426,7 @@ func (mtb *MoneroTipBot) parseCommandWITHDRAW() error {
 
 	withdrawaddress := mtb.message.CommandArguments()
 
-	validaddr, err := mtb.walletrpc.ValidateAddress(&wallet.RequestValidateAddress{Address: withdrawaddress, AnyNetType: true})
+	validaddr, err := mtb.walletrpc.ValidateAddress(&wallet.RequestValidateAddress{Address: withdrawaddress, AnyNetType: viper.GetBool("IS_STAGENET_WALLET")})
 	if err != nil {
 		msg.Text = "Something went wrong. Could not validate address."
 		return mtb.reply(msg)
