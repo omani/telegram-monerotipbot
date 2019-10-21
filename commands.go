@@ -135,6 +135,9 @@ func (mtb *MoneroTipBot) parseCommandTIP() error {
 		return mtb.reply(msg)
 	}
 	if parseamount < viper.GetFloat64("MIN_TIP_AMOUNT") {
+		if !mtb.message.Chat.IsPrivate() {
+			msg.ChatID = mtb.message.Chat.ID
+		}
 		msg.Text = fmt.Sprintf("Minimum tipping amount is %f. Aborting.", viper.GetFloat64("MIN_TIP_AMOUNT"))
 		return mtb.reply(msg)
 	}
@@ -386,6 +389,9 @@ func (mtb *MoneroTipBot) parseCommandGIVEAWAY() error {
 		return mtb.reply(msg)
 	}
 	if parseamount < viper.GetFloat64("MIN_TIP_AMOUNT") {
+		if !mtb.message.Chat.IsPrivate() {
+			msg.ChatID = mtb.message.Chat.ID
+		}
 		msg.Text = fmt.Sprintf("Minimum tipping amount is %f. Aborting.", viper.GetFloat64("MIN_TIP_AMOUNT"))
 		return mtb.reply(msg)
 	}
