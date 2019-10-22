@@ -9,19 +9,19 @@ A Telegram Monero tip bot written in go.
 
 ___
 ## Preface
-This is the official repository of the Monero tip bot for Telegram, also known under the username [@MoneroTipBot](http://t.me/MoneroTipBot).
+This is the repository of the Monero tip bot for Telegram, also known under the username [@MoneroTipBot](http://t.me/MoneroTipBot).
 
 ## Introduction
 What can this bot do?
 
-MoneroTipBot is the one and only, first official Monero wallet for Telegram that started with a [CCS Proposal](https://ccs.getmonero.org) and has been funded by the great Monero community.
+MoneroTipBot is the one and only, first Monero wallet for Telegram that started with a [CCS Proposal](https://ccs.getmonero.org) and has been funded by the great Monero community.
 
 MoneroTipBot will be open sourced (under the MIT license) on GitHub.
 
 **ATTENTION/IMPORTANT**
 
 Since the code is open source, beware of MoneroTipBot clones who could potentially scam you.
-The only official bot is the bot under the Telegram username [@MoneroTipBot](http://t.me/MoneroTipBot).
+The only bot is the bot under the Telegram username [@MoneroTipBot](http://t.me/MoneroTipBot).
 If in doubt, please do not hesitate to ask in various Monero groups for the right bot.
 
 We are not responsible - at all - for any usage of the code by other people in any way!
