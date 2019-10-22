@@ -476,10 +476,6 @@ func (mtb *MoneroTipBot) getUserAccount() (*Account, error) {
 	mtb.statsdFGauge("total_balance.counter", wallet.XMRToFloat64(accounts.TotalBalance))
 	mtb.statsdFGauge("total_unlocked_balance.counter", wallet.XMRToFloat64(accounts.TotalUnlockedBalance))
 
-	var label string
-	// we see user's ID. it means we already know the user.
-	label = fmt.Sprintf("%s@", strings.ToLower(mtb.getUsername()))
-
 	for _, address := range accounts.SubaddressAccounts {
 		split := strings.Split(address.Label, "@")
 		if len(split) == 2 {
@@ -492,6 +488,34 @@ func (mtb *MoneroTipBot) getUserAccount() (*Account, error) {
 			}
 		}
 
+		// IMPORTANT: we need to check for both, username AND userid. one after the other.
+		// a user could change his username. but userid is still the same!
+
+		// we see user's ID. it means we already know the user.
+		label := fmt.Sprintf("%s@", strings.ToLower(mtb.getUsername()))
+		if strings.Contains(address.Label, label) {
+			useraccount := &Account{
+				AccountIndex:    address.AccountIndex,
+				Balance:         address.Balance,
+				BaseAddress:     address.BaseAddress,
+				Label:           address.Label,
+				Tag:             address.Tag,
+				UnlockedBalance: address.UnlockedBalance,
+			}
+
+			// label the account of a known user on every request. this is a cheap operation
+			if mtb.isKnownUser() {
+				mtb.walletrpc.LabelAccount(&wallet.RequestLabelAccount{
+					AccountIndex: address.AccountIndex,
+					Label:        fmt.Sprintf("%s@%d", strings.ToLower(mtb.getUsername()), mtb.getUsernameID()),
+				})
+			}
+
+			return useraccount, nil
+		}
+
+		// username not found. maybe the user changed his username. so check if we have a userid already.
+		label = fmt.Sprintf("@%d", mtb.getUsernameID())
 		if strings.Contains(address.Label, label) {
 			useraccount := &Account{
 				AccountIndex:    address.AccountIndex,
