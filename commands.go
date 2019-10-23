@@ -138,7 +138,7 @@ func (mtb *MoneroTipBot) parseCommandTIP() error {
 		if !mtb.message.Chat.IsPrivate() {
 			msg.ChatID = mtb.message.Chat.ID
 		}
-		msg.Text = fmt.Sprintf("Minimum tipping amount is %f. Aborting.", viper.GetFloat64("MIN_TIP_AMOUNT"))
+		msg.Text = fmt.Sprintf("Minimum amount for a tip is %f XMR", viper.GetFloat64("MIN_TIP_AMOUNT"))
 		return mtb.reply(msg)
 	}
 	amount := wallet.Float64ToXMR(parseamount)
@@ -277,7 +277,7 @@ func (mtb *MoneroTipBot) parseCommandTIP() error {
 				msg.ChatID = mtb.message.Chat.ID
 				// success on reaching out to user PM.
 				if mtb.message.Chat.IsGroup() || mtb.message.Chat.IsSuperGroup() {
-					msg.Text = fmt.Sprintf("@%s, you have been tipped with %f XMR from user @%s.\nPlease PM me (@%s) and click the 'Start' button to complete your account.", username, wallet.XMRToFloat64(amount), mtb.message.From.UserName, viper.GetString("BOT_NAME"))
+					msg.Text = fmt.Sprintf("@%s, you have been tipped with %f XMR from user @%s.", username, wallet.XMRToFloat64(amount), mtb.message.From.UserName)
 				}
 				if mtb.message.Chat.IsPrivate() {
 					msg.Text = fmt.Sprintf("Silently tipped @%s with %f XMR. Notification failed. Please notify the user of starting this bot (@%s).", username, wallet.XMRToFloat64(amount), viper.GetString("BOT_NAME"))
@@ -392,7 +392,7 @@ func (mtb *MoneroTipBot) parseCommandGIVEAWAY() error {
 		if !mtb.message.Chat.IsPrivate() {
 			msg.ChatID = mtb.message.Chat.ID
 		}
-		msg.Text = fmt.Sprintf("Minimum tipping amount is %f. Aborting.", viper.GetFloat64("MIN_TIP_AMOUNT"))
+		msg.Text = fmt.Sprintf("Minimum amount for a tip is %f XMR", viper.GetFloat64("MIN_TIP_AMOUNT"))
 		return mtb.reply(msg)
 	}
 

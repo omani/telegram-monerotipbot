@@ -639,7 +639,7 @@ func (mtb *MoneroTipBot) processGiveaway() error {
 					msg.Text = fmt.Sprintf("You have been tipped with %f XMR from user @%s", wallet.XMRToFloat64(giveaway.Amount), giveaway.From.From.UserName)
 					err := mtb.reply(msg)
 					if err != nil {
-						edit := tgbotapi.NewEditMessageText(int64(mtb.callback.Message.Chat.ID), giveaway.Message.MessageID, fmt.Sprintf("User @%s is giving %f XMR away.\n\n%f XMR given from @%s to @%s.\n\n@%s, you have been tipped.\nPlease PM me (@%s) and click the 'Start' button to complete your account.", giveaway.From.From.UserName, wallet.XMRToFloat64(resp.Amount), wallet.XMRToFloat64(resp.Amount), giveaway.From.From.UserName, claimer, claimer, viper.GetString("BOT_NAME")))
+						edit := tgbotapi.NewEditMessageText(int64(mtb.callback.Message.Chat.ID), giveaway.Message.MessageID, fmt.Sprintf("User @%s is giving %f XMR away.\n\n%f XMR given from @%s to @%s.\n\n@%s, you have been tipped.", giveaway.From.From.UserName, wallet.XMRToFloat64(resp.Amount), wallet.XMRToFloat64(resp.Amount), giveaway.From.From.UserName, claimer, claimer))
 						mtb.bot.Send(edit)
 						// send notification to giver here
 						return mtb.reply(tippermsg)
