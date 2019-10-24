@@ -491,7 +491,7 @@ func (mtb *MoneroTipBot) getUserAccount() (*Account, error) {
 		// IMPORTANT: we need to check for both, username AND userid. one after the other.
 		// a user could change his username. but userid is still the same!
 
-		// we see user's ID. it means we already know the user.
+		// first we try with the username.
 		label := fmt.Sprintf("%s@", strings.ToLower(mtb.getUsername()))
 		if strings.Contains(address.Label, label) {
 			useraccount := &Account{
@@ -514,10 +514,12 @@ func (mtb *MoneroTipBot) getUserAccount() (*Account, error) {
 			return useraccount, nil
 		}
 
-		// username not found. maybe the user changed his username. so check if we have a userid already.
+		// continue with next, if userid is 0.
 		if mtb.getUsernameID() == 0 {
 			continue
 		}
+
+		// username not found. maybe the user changed his username. so check for the userid.
 		label = fmt.Sprintf("@%d", mtb.getUsernameID())
 		if strings.Contains(address.Label, label) {
 			useraccount := &Account{
