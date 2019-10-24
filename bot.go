@@ -477,11 +477,11 @@ func (mtb *MoneroTipBot) getUserAccount() (*Account, error) {
 	mtb.statsdFGauge("total_unlocked_balance.counter", wallet.XMRToFloat64(accounts.TotalUnlockedBalance))
 
 	for _, address := range accounts.SubaddressAccounts {
+		// stat labels so we have them stored somewhere else than only in local files
 		split := strings.Split(address.Label, "@")
 		if len(split) == 2 {
 			userid, err := strconv.ParseInt(split[1], 10, 64)
 			if err == nil {
-				// stat labels so we have them stored somewhere else than only in local files
 				mtb.statsdGauge(fmt.Sprintf("account_labels_usernames.%s", split[0]), userid)
 				mtb.statsdGauge(fmt.Sprintf("account_labels.%d", userid), int64(address.AccountIndex))
 				mtb.statsdFGauge(fmt.Sprintf("account_balance_per_label.%d", userid), wallet.XMRToFloat64(address.Balance))
@@ -515,6 +515,9 @@ func (mtb *MoneroTipBot) getUserAccount() (*Account, error) {
 		}
 
 		// username not found. maybe the user changed his username. so check if we have a userid already.
+		if mtb.getUsernameID() == 0 {
+			continue
+		}
 		label = fmt.Sprintf("@%d", mtb.getUsernameID())
 		if strings.Contains(address.Label, label) {
 			useraccount := &Account{
