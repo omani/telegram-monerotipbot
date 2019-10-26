@@ -2,7 +2,7 @@ telegram-monerotipbot
 ========================
 
 <p align="center">
-<img src="https://github.com/omani/telegram-monerotipbot/raw/master/assets/img/icon.png" alt="MoneroTipBot" width="200" />
+<img src="https://github.com/monero-ecosystem/telegram-monerotipbot/raw/master/assets/img/icon.png" alt="MoneroTipBot" width="200" />
 </p>
 
 A Telegram Monero tip bot written in go.

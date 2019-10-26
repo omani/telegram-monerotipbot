@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	monerotipbot "github.com/omani/telegram-monerotipbot"
+	monerotipbot "github.com/monero-ecosystem/telegram-monerotipbot"
 )
 
 func main() {

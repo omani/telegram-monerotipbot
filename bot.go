@@ -24,7 +24,7 @@ import (
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
-	"github.com/omani/go-xmrto-client"
+	"github.com/monero-ecosystem/go-xmrto-client"
 	zmq "github.com/pebbe/zmq4"
 	"github.com/spf13/viper"
 

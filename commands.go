@@ -13,7 +13,7 @@ import (
 	"github.com/makiuchi-d/gozxing/qrcode"
 	"github.com/makiuchi-d/gozxing/qrcode/decoder"
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
-	"github.com/omani/go-xmrto-client"
+	"github.com/monero-ecosystem/go-xmrto-client"
 	"github.com/spf13/viper"
 
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
