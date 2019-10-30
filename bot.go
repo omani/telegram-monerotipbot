@@ -196,6 +196,12 @@ func (mtb *MoneroTipBot) Run() error {
 
 		if !iscallback {
 			if mtb.message.IsCommand() {
+				// ignore commands from forwarded messages
+				if mtb.message.ForwardFrom != nil || mtb.message.ForwardFromChat != nil {
+					mtb.destroy()
+					continue
+				}
+
 				// request pre-checks
 				err := mtb.requestPreCheck()
 				if err != nil {
