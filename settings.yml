@@ -5,7 +5,7 @@ blockexplorer_url: "https://xmrchain.net/tx/"
 
 BOT_NAME: ""
 DEV_DONATION_ADDRESS: "88jspkqPmvvc9L3LovdhjoCW2eBSKk4VNTsrdWqB4CYdBfKRWH5yL39bE6NP5Di2Wgix1cxBgKMAiXMbUwCBY3Dk2WvwSSA"
-MIN_TIP_AMOUNT: 0.00042
+MIN_TIP_AMOUNT: 0.00004
 GIVEAWAY_FILE: "giveaways.json" # absolute path will also work
 BROADCAST_NOTIFICATION_INTERVAL: 10
 LOGFILE: "monerotipbot.log" # this must be set! regardless if you use logging.
