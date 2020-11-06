@@ -811,8 +811,12 @@ func (mtb *MoneroTipBot) processXMRToOrder() error {
 				}
 
 				var destinations []*wallet.Destination
+				xmramounttotal, err := wallet.StringToXMR(xmrtoOrder.Order.XMRAmountTotal)
+				if err != nil {
+					return err
+				}
 				destinations = append(destinations, &wallet.Destination{
-					Amount:  wallet.Float64ToXMR(xmrtoOrder.Order.XMRAmountTotal),
+					Amount:  xmramounttotal,
 					Address: xmrtoOrder.Order.XMRReceivingSubAddress,
 				})
 				// stat the transfer time
@@ -1227,7 +1231,7 @@ func monitorXMRToOrder(order *XMRToOrder, bot *tgbotapi.BotAPI) error {
 
 			if orderstatus.State != laststate {
 				if orderstatus.State == "BTC_SENT" {
-					msg.Text = fmt.Sprintf("(<b>%s</b>):\n\nstate change detected:\nYour order has now state <b>%s</b>\n\nState: <b>%s</b>\nUUID: %s\nBTCAmount: %f\nBTCDestAddress: %s\nBTCTransactionID: %s\nXMRNumConfirmationsRemaining: %d", orderstatus.UUID, orderstatus.State, orderstatus.State, orderstatus.UUID, orderstatus.BTCAmount, orderstatus.BTCDestAddress, orderstatus.BTCTransactionID, orderstatus.XMRNumConfirmationsRemaining)
+					msg.Text = fmt.Sprintf("(<b>%s</b>):\n\nstate change detected:\nYour order has now state <b>%s</b>\n\nState: <b>%s</b>\nUUID: %s\nBTCAmount: %s\nBTCDestAddress: %s\nBTCTransactionID: %s\nXMRNumConfirmationsRemaining: %d", orderstatus.UUID, orderstatus.State, orderstatus.State, orderstatus.UUID, orderstatus.BTCAmount, orderstatus.BTCDestAddress, orderstatus.BTCTransactionID, orderstatus.XMRNumConfirmationsRemaining)
 				} else {
 					msg.Text = fmt.Sprintf("(<b>%s</b>)\n\nstate change detected:\nYour order has now state <b>%s</b>", orderstatus.UUID, orderstatus.State)
 				}
@@ -1236,7 +1240,7 @@ func monitorXMRToOrder(order *XMRToOrder, bot *tgbotapi.BotAPI) error {
 			}
 			if orderstatus.State == "BTC_SENT" {
 				// xmrto has sent the btc. we can stop the monitoring process here.
-				msg.Text = fmt.Sprintf("(<b>%s</b>)\n\nCongratulations!\n\n%f BTC have been sent to BTC destination address %s.\n\nTrack your BTC transaction ID <a href='%s/%s'>%s</a>.\n\nXMRTO order complete.\n\nGood bye.\n\nPowered by @%s via https://xmr.to", orderstatus.UUID, orderstatus.BTCAmount, orderstatus.BTCDestAddress, viper.GetString("xmrto_btc_blockexplorer"), orderstatus.BTCTransactionID, orderstatus.BTCTransactionID, viper.GetString("BOT_NAME"))
+				msg.Text = fmt.Sprintf("(<b>%s</b>)\n\nCongratulations!\n\n%s BTC have been sent to BTC destination address %s.\n\nTrack your BTC transaction ID <a href='%s/%s'>%s</a>.\n\nXMRTO order complete.\n\nGood bye.\n\nPowered by @%s via https://xmr.to", orderstatus.UUID, orderstatus.BTCAmount, orderstatus.BTCDestAddress, viper.GetString("xmrto_btc_blockexplorer"), orderstatus.BTCTransactionID, orderstatus.BTCTransactionID, viper.GetString("BOT_NAME"))
 				bot.Send(msg)
 				return nil
 			}
