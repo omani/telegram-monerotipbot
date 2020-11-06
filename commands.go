@@ -635,7 +635,7 @@ func (mtb *MoneroTipBot) parseCommandXMRTO() error {
 			return err
 		}
 		mtb.statsdIncr("xmrto_getorderparams.counter", 1)
-		msg.Text = fmt.Sprintf("XMR.TO Current Order Parameters\n\nPrice: %f\nLowerLimit: %f\nUpperLimit: %f\nZeroConfEnabled: %t\nZeroConfMaxAmount: %f", getorder.Price, getorder.LowerLimit, getorder.UpperLimit, getorder.ZeroConfEnabled, getorder.ZeroConfMaxAmount)
+		msg.Text = fmt.Sprintf("XMR.TO Current Order Parameters\n\nPrice: %s\nLowerLimit: %s\nUpperLimit: %s\nZeroConfEnabled: %t\nZeroConfMaxAmount: %s", getorder.Price, getorder.LowerLimit, getorder.UpperLimit, getorder.ZeroConfEnabled, getorder.ZeroConfMaxAmount)
 		return mtb.reply(msg)
 	}
 
@@ -681,7 +681,8 @@ func (mtb *MoneroTipBot) parseCommandXMRTO() error {
 
 	// let's create an order with 0.001 btc.
 	createorder, err := client.CreateOrder(&xmrto.RequestCreateOrder{
-		BTCAmount:      parseamount,
+		Amount:         parseamount,
+		AmountCurrency: "BTC",
 		BTCDestAddress: btcaddress,
 	})
 	if err != nil {
@@ -699,7 +700,7 @@ func (mtb *MoneroTipBot) parseCommandXMRTO() error {
 
 	time.Sleep(time.Second * 3)
 
-	str1 := fmt.Sprintf("-- XMR.TO Reponse --\nBTCAmount: %f\nBTCDestAddress: %s\nState: %s\nUUID: %s", createorder.BTCAmount, createorder.BTCDestAddress, createorder.State, createorder.UUID)
+	str1 := fmt.Sprintf("-- XMR.TO Reponse --\nBTCAmount: %s\nBTCDestAddress: %s\nState: %s\nUUID: %s", createorder.BTCAmount, createorder.BTCDestAddress, createorder.State, createorder.UUID)
 	str2 := fmt.Sprintf("Fetching order details from XMRTO API with secret-key: %s", createorder.UUID)
 	edit := tgbotapi.NewEditMessageText(int64(chattable.Chat.ID), chattable.MessageID, "")
 	edit.Text = fmt.Sprintf("%s\n\n%s\n\n%s", chattable.Text, str1, str2)
@@ -720,12 +721,25 @@ func (mtb *MoneroTipBot) parseCommandXMRTO() error {
 	}
 	mtb.statsdIncr("xmrto_orderstatus.counter", 1)
 
-	if useraccount.UnlockedBalance <= wallet.Float64ToXMR(orderstatus.XMRAmountTotal) {
-		msg.Text = fmt.Sprintf("Insufficient funds. You need at least %f XMR in your unlocked balance.", parseamount)
+	orderstatusxmramount, err := strconv.ParseFloat(orderstatus.XMRAmountTotal, 64)
+	if err != nil {
+		msg.Text = fmt.Sprintf("XMRTO API Error: %s", err)
+		return mtb.reply(msg)
+	}
+	ordercheckprice, err := client.GetOrderPrice(&xmrto.RequestGetOrderPrice{
+		Amount:         parseamount,
+		AmountCurrency: "BTC",
+	})
+	if err != nil {
+		msg.Text = fmt.Sprintf("XMRTO API Error: %s", err)
+		return mtb.reply(msg)
+	}
+	if useraccount.UnlockedBalance <= wallet.Float64ToXMR(orderstatusxmramount) {
+		msg.Text = fmt.Sprintf("Insufficient funds. At the current exchange rate of %s BTC per XMR (given by xmr.to), you would need at least %s XMR in your unlocked balance.", ordercheckprice.XMRPriceBTC, ordercheckprice.XMRAmountTotal)
 		return mtb.reply(msg)
 	}
 
-	out := fmt.Sprintf("%s\n\n-- XMR.TO Reponse --\nState: <b>%s</b>\nUUID: <b>%s</b>\nBTCAmount: %f\nBTCDestAddress: %s\nCreatedAT: %s\nExpiresAT: %s\nSecondsTillTimeout: %d\nXMRAmountTotal: %f XMR\nXMRPriceBTC: %f BTC\nXMRReceivingSubAddress: %s",
+	out := fmt.Sprintf("%s\n\n-- XMR.TO Reponse --\nState: <b>%s</b>\nUUID: <b>%s</b>\nBTCAmount: %s\nBTCDestAddress: %s\nCreatedAT: %s\nExpiresAT: %s\nSecondsTillTimeout: %d\nXMRAmountTotal: %s XMR\nXMRPriceBTC: %s BTC\nXMRReceivingSubAddress: %s",
 		chattable.Text,
 		orderstatus.State,
 		orderstatus.UUID,
@@ -739,7 +753,7 @@ func (mtb *MoneroTipBot) parseCommandXMRTO() error {
 		orderstatus.XMRReceivingSubAddress,
 	)
 
-	out = fmt.Sprintf("%s\n\n---\nNeed to deposit %f XMR to above <i>XMRReceivingSubAddress</i> wallet to relay the requested BTC.\n\nTo complete your request I will send %f XMR from your account to the given address above. Please confirm or cancel.\n\n<b>You have less than 4 minutes to confirm this transaction.</b>\n", out, orderstatus.XMRAmountTotal, orderstatus.XMRAmountTotal)
+	out = fmt.Sprintf("%s\n\n---\nNeed to deposit %s XMR to above <i>XMRReceivingSubAddress</i> wallet to relay the requested BTC.\n\nTo complete your request I will send %s XMR from your account to the given address above. Please confirm or cancel.\n\n<b>You have less than 4 minutes to confirm this transaction.</b>\n", out, orderstatus.XMRAmountTotal, orderstatus.XMRAmountTotal)
 
 	claim := tgbotapi.NewInlineKeyboardButtonData("Send", "xmrto_tx_send")
 	cancel := tgbotapi.NewInlineKeyboardButtonData("Cancel", "xmrto_tx_cancel")
