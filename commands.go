@@ -456,8 +456,9 @@ func (mtb *MoneroTipBot) parseCommandWITHDRAW() error {
 	// stat the transfer time
 	start := time.Now()
 	resp, err := mtb.walletrpc.SweepAll(&wallet.RequestSweepAll{
-		AccountIndex: useraccount.AccountIndex,
-		Address:      mtb.message.CommandArguments(),
+		AccountIndex:      useraccount.AccountIndex,
+		Address:           mtb.message.CommandArguments(),
+		SubaddrIndicesAll: true,
 	})
 	if err != nil {
 		msg.Text = fmt.Sprintf("Error: %s", err)
