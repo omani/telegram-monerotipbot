@@ -624,6 +624,11 @@ func (mtb *MoneroTipBot) parseCommandGENERATEQR() error {
 }
 
 func (mtb *MoneroTipBot) parseCommandXMRTO() error {
+	// announce that the xmr.to service has shutdown!
+	msg := mtb.newReplyMessage(false)
+	msg.Text = "ATTENTION: xmr.to has shutdown its service. Read more on https://xmr.to/blog/job-done."
+	return mtb.reply(msg)
+
 	// initiate a new xmrto client
 	client := xmrto.New(&xmrto.Config{Testnet: viper.GetBool("IS_STAGENET_WALLET")})
 
