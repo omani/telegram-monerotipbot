@@ -645,7 +645,7 @@ func (mtb *MoneroTipBot) parseCommandXMRTO() error {
 		return mtb.reply(msg)
 	}
 
-	msg := mtb.newReplyMessage(false)
+	msg = mtb.newReplyMessage(false)
 	split := strings.SplitN(mtb.message.CommandArguments(), " ", 2)
 	if len(split) < 1 {
 		msg.Text = "Need correct amount of command arguments."
