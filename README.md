@@ -2,38 +2,22 @@ telegram-monerotipbot
 ========================
 
 <p align="center">
-<img src="https://github.com/monero-ecosystem/telegram-monerotipbot/raw/master/assets/img/icon.png" alt="MoneroTipBot" width="200" />
+<img src="https://github.com/monero-ecosystem/telegram-monerotipbot/raw/master/assets/img/icon.png" alt="A Monero wallet for Telegram" width="200" />
 </p>
 
 A Telegram Monero tip bot written in go.
 
 ___
-## Preface
-This is the repository of the Monero tip bot for Telegram, also known under the username [@MoneroTipBot](http://t.me/MoneroTipBot).
-
 ## Introduction
 What can this bot do?
 
-MoneroTipBot is the one and only, first Monero wallet for Telegram that started with a [CCS Proposal](https://ccs.getmonero.org) and has been funded by the great Monero community.
-
-MoneroTipBot will be open sourced (under the MIT license) on GitHub.
-
-**ATTENTION/IMPORTANT**
-
-Since the code is open source, beware of MoneroTipBot clones who could potentially scam you.
-The only bot is the bot under the Telegram username [@MoneroTipBot](http://t.me/MoneroTipBot).
-If in doubt, please do not hesitate to ask in various Monero groups for the right bot.
-
-We are not responsible - at all - for any usage of the code by other people in any way!
+MoneroTipBot is the one and only, first open source Monero wallet for Telegram that started with a [CCS Proposal](https://ccs.getmonero.org) and has been funded by the great Monero community.
 
 **Notice**:
 
-This is a custodial Monero wallet service. You do not own your private keys. We own them!
-Beside the wallet itself, nothing will be stored on the server - where the bot is running - ever. No user data, personal information or otherwise personal data will be stored. The bot is expected to be stable. However, always have in mind that you might lose your money due to a bug or we can get hacked and lose all funds. We cannot guarantee anything. So use this bot on your own risk!
+This is a custodial Monero wallet service by the bot operator. You do not own your private keys. The bot operator owns them!
+Beside the wallet itself, nothing will be stored on the server - where the bot is running - ever. No user data, personal information or otherwise personal data will be stored. The bot is expected to be stable. However, always have in mind that you might lose your money due to a bug or we can get hacked and lose all funds. Use this bot on your own risk!
 
-**Warning**:
-
-If you ever think about misusing this bot for more than just tipping small amounts to other users, for example using it as your personal wallet, please be informed that there is absolutely no guarantee - in whatever form - given by the bot and the bot operator. By using this bot you agree that you read and agreed to the LEGAL NOTICE.
 
 **Features**:
 - Everything happens on-chain.
@@ -45,16 +29,11 @@ If you ever think about misusing this bot for more than just tipping small amoun
 - Send Monero to regular addresses.
 - Receive Monero on regular addresses.
 - Make Giveaways within groups.
-- Send BTC by sending XMR via xmr.to
 - Generate a QR-Code image and share it comfortably with others.
 - Make transactions by scanning or uploading a QR-Code image.
 - Deposit to account.
 - Withdraw from account.
 - Clickable TX Hash link to blockexplorer.
-
-**LEGAL NOTICE**:
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Invite this bot to your group (bot needs no admin rights) and enjoy Monero in Telegram.
 
@@ -90,11 +69,6 @@ Withdraw everything from the tip bot wallet to your own wallet address.
 Generate a QR-Code image with the desired amount and optionally a description to share with others.
 
 You can also paste a QR-Code image into this PM chat with me and I will try to decode it. This way you can make transactions by scanning QR-Codes.
-
-
-/xmrto btc-address amount
-Needs no further introduction. Those who know xmr.to will love this. :)
-Pay the world with Monero via xmr.to from within the MoneroTipBot!
 
 
 /help command
@@ -173,20 +147,6 @@ ___
 Withdraw everything from the tip bot wallet to your own wallet address.
 
 Make sure you double-check the recipient address to make sure you are sending to the right address.
-
-___
-
-`/help xmrto`
-
-/xmrto btc-address amount
-
-MoneroTipBot implements the API of https://xmr.to and makes it possible to send BTC anywhere by sending XMR to their service.
-Specify the BTC address you want to send BTC to and the amount. The bot will start an interactive dialog and will guide you through the process.
-Pass the /xmrto command without any arguments to see the order parameters of xmr.to.
-
-**Highlight**:
-
-Upload a BITCOIN QR-Code with a correct URI (that is, with an amount encoded) and tag (add a caption to) the image with 'xmr.to' (without the quotes) before uploading it to the bot PM."
 
 ___
 
