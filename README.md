@@ -376,7 +376,7 @@ You can make me happy by donating Monero to the following address:
 ```
 
 ## Author
-HAH! Sun (omani). Known as [@tombish](http://t.me/tombish) in Telegram.
+HAH! Sun (omani)
 
 ## LICENSE
 MIT License
