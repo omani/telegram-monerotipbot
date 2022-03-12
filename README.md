@@ -319,6 +319,10 @@ Now install all golang dependencies with one command:
 ```
 go mod tidy
 ```
+If you are on go1.17 you can use:
+```
+go mod tidy -compat=1.17
+```
 
 #### Bot
 Start the bot and specify the settings file:
