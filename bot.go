@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -24,7 +23,6 @@ import (
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
-	"github.com/monero-ecosystem/go-xmrto-client"
 	zmq "github.com/pebbe/zmq4"
 	"github.com/spf13/viper"
 
@@ -41,7 +39,6 @@ type MoneroTipBot struct {
 	from         *tgbotapi.User
 	giveaways    []*Giveaway
 	qrcodes      []*QRCode
-	xmrtoOrders  []*XMRToOrder
 	rpcchannel   *zmq.Socket
 	statsdclient *statsd.Client
 }
@@ -217,20 +214,10 @@ func (mtb *MoneroTipBot) Run() error {
 			} else {
 				// check if we received a photo (possibly a qr-code)
 				if mtb.message.Photo != nil {
-					if mtb.message.Caption == "xmr.to" {
-						// we received a photo with caption "xmr.to".
-						// is the user trying to upload a BTC qr-code to relay to xmr.to? check it here...
-						err = mtb.parseXMRToPhoto()
-						if err != nil {
-							mtb.destroy()
-							continue
-						}
-					} else {
-						err = mtb.parsePhoto()
-						if err != nil {
-							mtb.destroy()
-							continue
-						}
+					err = mtb.parsePhoto()
+					if err != nil {
+						mtb.destroy()
+						continue
 					}
 				}
 			}
@@ -254,13 +241,6 @@ func (mtb *MoneroTipBot) Run() error {
 			}
 			if strings.HasPrefix(mtb.callback.Data, "qrcode_") {
 				err = mtb.processQRCode()
-				if err != nil {
-					mtb.destroy()
-					continue
-				}
-			}
-			if strings.HasPrefix(mtb.callback.Data, "xmrto_") {
-				err = mtb.processXMRToOrder()
 				if err != nil {
 					mtb.destroy()
 					continue
@@ -455,13 +435,6 @@ func (mtb *MoneroTipBot) parseCommand() error {
 		// stat this command invocation
 		mtb.statsdIncr("commands.GENERATEQR.counter", 1)
 		return mtb.parseCommandGENERATEQR()
-	case COMMANDS[XMRTO]:
-		if !mtb.message.Chat.IsPrivate() {
-			return mtb.reply(msg)
-		}
-		// stat this command invocation
-		mtb.statsdIncr("commands.XMRTO.counter", 1)
-		return mtb.parseCommandXMRTO()
 	}
 
 	return nil
@@ -771,117 +744,6 @@ func (mtb *MoneroTipBot) processQRCode() error {
 	return nil
 }
 
-func (mtb *MoneroTipBot) processXMRToOrder() error {
-	switch mtb.callback.Data {
-	case "xmrto_tx_send":
-		for i, xmrtoOrder := range mtb.xmrtoOrders {
-			if xmrtoOrder.Message.MessageID == mtb.message.MessageID {
-				if xmrtoOrder.From.From.UserName != mtb.callback.From.UserName {
-					mtb.bot.AnswerCallbackQuery(tgbotapi.CallbackConfig{
-						CallbackQueryID: mtb.callback.ID,
-						Text:            "Something went wrong!",
-					})
-					return errors.New("Something went wrong")
-				}
-
-				// initiate a new xmrto client
-				client := xmrto.New(&xmrto.Config{Testnet: viper.GetBool("IS_STAGENET_WALLET")})
-				orderstatus, err := client.GetOrderStatus(&xmrto.RequestGetOrderStatus{UUID: xmrtoOrder.Order.UUID})
-				if err != nil {
-					mtb.bot.AnswerCallbackQuery(tgbotapi.CallbackConfig{
-						CallbackQueryID: mtb.callback.ID,
-						Text:            "Something went wrong!",
-					})
-					return errors.New("Something went wrong")
-				}
-
-				// timeout if less than 60 seconds left before xmrto gives us a timeout. (just in case the send might delay)
-				// we rather let the user try it again than let him lose money here and contact xmr.to support email :)
-				if orderstatus.SecondsTillTimeout <= 60 {
-					edit := tgbotapi.NewEditMessageText(int64(mtb.callback.Message.Chat.ID), xmrtoOrder.Message.MessageID, "")
-					edit.Text = fmt.Sprintf("%s\n\n...<b>Timed out!</b>", xmrtoOrder.Message.Text)
-					edit.ParseMode = "HTML"
-					mtb.bot.Send(edit)
-					return nil
-				}
-
-				useraccount, err := mtb.getUserAccount()
-				if err != nil {
-					return err
-				}
-
-				var destinations []*wallet.Destination
-				xmramounttotal, err := wallet.StringToXMR(xmrtoOrder.Order.XMRAmountTotal)
-				if err != nil {
-					return err
-				}
-				destinations = append(destinations, &wallet.Destination{
-					Amount:  xmramounttotal,
-					Address: xmrtoOrder.Order.XMRReceivingSubAddress,
-				})
-				// stat the transfer time
-				start := time.Now()
-				resp, err := mtb.walletrpc.Transfer(&wallet.RequestTransfer{
-					AccountIndex: useraccount.AccountIndex,
-					Destinations: destinations,
-				})
-				if err != nil {
-					edit := tgbotapi.NewEditMessageText(int64(mtb.callback.Message.Chat.ID), xmrtoOrder.Message.MessageID, "")
-					edit.Text = fmt.Sprintf("%s\n\n...<b>%s</b>", xmrtoOrder.Message.Text, err)
-					edit.ParseMode = "HTML"
-					mtb.bot.Send(edit)
-					return err
-				}
-				mtb.statsdPrecisionTiming("transaction.time_to_complete", time.Since(start))
-				// stat the transaction count
-				mtb.statsdIncr("transactions.counter", 1)
-
-				mtb.xmrtoOrders = append(mtb.xmrtoOrders[:i], mtb.xmrtoOrders[i+1:]...)
-
-				edit := tgbotapi.NewEditMessageText(int64(mtb.callback.Message.Chat.ID), xmrtoOrder.Message.MessageID, "")
-				edit.Text = fmt.Sprintf("%s\n\n...<b>Transaction complete!</b>", xmrtoOrder.Message.Text)
-				edit.ParseMode = "HTML"
-				mtb.bot.Send(edit)
-
-				msg := mtb.newReplyMessage(false)
-				// replace the chatID with the giver. else we notify the taker.
-				msg.ChatID = int64(xmrtoOrder.From.From.ID)
-				msg.Text = fmt.Sprintf("Amount: %s\nFee: %s\nTxHash: <a href='%s%s'>%s</a>", wallet.XMRToDecimal(resp.Amount), wallet.XMRToDecimal(resp.Fee), viper.GetString("blockexplorer_url"), resp.TxHash, resp.TxHash)
-				mtb.reply(msg)
-
-				go monitorXMRToOrder(xmrtoOrder, mtb.bot)
-			}
-		}
-	case "xmrto_tx_cancel":
-		if mtb.xmrtoOrders == nil {
-			return nil
-		}
-
-		for i, xmrtoOrder := range mtb.xmrtoOrders {
-			if xmrtoOrder.Message.MessageID == mtb.message.MessageID {
-				if xmrtoOrder.From.From.UserName == mtb.callback.From.UserName {
-					edit := tgbotapi.NewEditMessageText(int64(mtb.message.Chat.ID), xmrtoOrder.Message.MessageID, "")
-					edit.Text = fmt.Sprintf("%s\n\n...<b>Canceled!</b>", xmrtoOrder.Message.Text)
-					edit.ParseMode = "HTML"
-					mtb.bot.Send(edit)
-
-					mtb.xmrtoOrders = append(mtb.xmrtoOrders[:i], mtb.xmrtoOrders[i+1:]...)
-					return nil
-				}
-				mtb.bot.AnswerCallbackQuery(tgbotapi.CallbackConfig{
-					CallbackQueryID: mtb.callback.ID,
-					Text:            "Something went wrong!",
-				})
-				return nil
-			}
-		}
-	default:
-		return errors.New("Could not parse CallbackQuery")
-	}
-
-	return nil
-}
-
 func (mtb *MoneroTipBot) saveGiveawayToFile() error {
 	file, err := json.MarshalIndent(mtb.giveaways, "", " ")
 	if err != nil {
@@ -889,98 +751,6 @@ func (mtb *MoneroTipBot) saveGiveawayToFile() error {
 	}
 
 	return ioutil.WriteFile(viper.GetString("GIVEAWAY_FILE"), file, 0644)
-}
-
-func (mtb *MoneroTipBot) parseXMRToPhoto() error {
-	if !mtb.message.Chat.IsPrivate() {
-		// do nothing, since this is not in my PM
-		return nil
-	}
-
-	// received a photo.
-	msg := mtb.newReplyMessage(true)
-
-	file, err := mtb.bot.GetFile(tgbotapi.FileConfig{FileID: (*mtb.message.Photo)[len((*mtb.message.Photo))-1].FileID})
-	if err != nil {
-		msg.Text = "Weird. Couldn't get uploaded image path from telegram servers. This shouldn't happen."
-		return mtb.reply(msg)
-	}
-
-	res, err := http.Get(file.Link(viper.GetString("telegram_bot_token")))
-	if err != nil {
-		msg.Text = "Couldn't download uploaded image from telegram servers. Try again later."
-		return mtb.reply(msg)
-	}
-
-	now := time.Now().Unix()
-	//open a file for writing
-	savefile, err := os.Create(fmt.Sprintf("/tmp/xmrto_qrcode.jpg_%d", now))
-	if err != nil {
-		msg.Text = "Could not create image file. Try again later."
-		return mtb.reply(msg)
-	}
-	_, err = io.Copy(savefile, res.Body)
-	if err != nil {
-		msg.Text = "Could not save image to file. Try again later."
-		return mtb.reply(msg)
-	}
-	savefile.Close()
-	defer os.Remove(savefile.Name())
-
-	qrimage, err := os.Open(fmt.Sprintf("/tmp/xmrto_qrcode.jpg_%d", now))
-	if err != nil {
-		msg.Text = "Could not open image file. Try again later."
-		return mtb.reply(msg)
-	}
-
-	img, _, err := image.Decode(qrimage)
-	if err != nil {
-		msg.Text = "Could decode image."
-		return mtb.reply(msg)
-	}
-
-	// prepare BinaryBitmap
-	bmp, err := gozxing.NewBinaryBitmapFromImage(img)
-	if err != nil {
-		msg.Text = "Could not open image file. Try again later."
-		return mtb.reply(msg)
-	}
-
-	// decode image
-	qrReader := qrcode.NewQRCodeReader()
-	harder := map[gozxing.DecodeHintType]interface{}{gozxing.DecodeHintType_TRY_HARDER: true}
-	result, err := qrReader.Decode(bmp, harder)
-	if err != nil {
-		msg.Text = "Could not detect QR-Code in image."
-		return mtb.reply(msg)
-	}
-
-	parseuri, err := url.ParseRequestURI(result.String())
-	if err != nil {
-		msg.Text = "Could not parse URI. Aborting."
-		return mtb.reply(msg)
-	}
-
-	values := parseuri.Query()
-	if len(values.Get("amount")) == 0 {
-		msg.Text = "Could not found amount in URI. Can't proceed from here."
-		return mtb.reply(msg)
-	}
-
-	/*********************************************************************
-		 trick:
-		 fake a command here to pipe it straight into parseCommandXMRTo()
-	*********************************************************************/
-	entity := tgbotapi.MessageEntity{
-		Length: 6,
-		Offset: 0,
-		Type:   "bot_command",
-	}
-	var entities []tgbotapi.MessageEntity
-	entities = append(entities, entity)
-	mtb.message.Entities = &entities
-	mtb.message.Text = fmt.Sprintf("xmr.to %s %s", parseuri.Opaque, values.Get("amount"))
-	return mtb.parseCommandXMRTO()
 }
 
 func (mtb *MoneroTipBot) parsePhoto() error {
@@ -1198,52 +968,5 @@ func (mtb *MoneroTipBot) statsdFGauge(stat string, value float64, tags ...statsd
 func (mtb *MoneroTipBot) statsdPrecisionTiming(stat string, delta time.Duration, tags ...statsd.Tag) {
 	if viper.GetBool("USE_STATSD") {
 		mtb.statsdclient.PrecisionTiming(stat, delta, tags...)
-	}
-}
-
-func monitorXMRToOrder(order *XMRToOrder, bot *tgbotapi.BotAPI) error {
-	ticker := time.NewTicker(1 * time.Second)
-	msg := tgbotapi.NewMessage(int64(order.From.From.ID), "")
-	msg.ParseMode = "HTML"
-	msg.Text = "Starting background process to monitor state changes of your XMRTO order.\nYou will receive a notification for each state change.\n\nMost important states:\n<b>UNPAID</b>: waiting for XMR payment from you.\n<b>PAID_UNCONFIRMED</b>: XMR transaction seen in mempool, waiting for confirmations.\n<b>PAID</b>: XMR transaction has enough confirmations.\n<b>BTC_SENT</b>: XMRTO sent the BTC out. From here you wait for the BTC network to confirm your BTC transaction.\n\nMonitoring. Stand by..."
-	bot.Send(msg)
-	laststate := order.Order.State
-	start := time.Now()
-
-	for {
-		select {
-		case <-ticker.C:
-			// fmt.Println("Tick at", t)
-			if time.Since(start).Seconds() > 3600 {
-				msg.Text = fmt.Sprintf("Didn't receive any order state change for 1 hour. Giving up monitoring.\n\nTry to track your order manually at %s/track by using the secret-key (UUID) <b>%s</b>.\n\nIf you experience any issues please consider contacting the support team of xmr.to!", viper.GetString("xmrto_website"), order.Order.UUID)
-				bot.Send(msg)
-				return nil
-			}
-
-			// initiate a new xmrto client
-			client := xmrto.New(&xmrto.Config{Testnet: viper.GetBool("IS_STAGENET_WALLET")})
-			orderstatus, err := client.GetOrderStatus(&xmrto.RequestGetOrderStatus{UUID: order.Order.UUID})
-			if err != nil {
-				msg.Text = fmt.Sprintf("XMRTO API Error: %s", err)
-				bot.Send(msg)
-				return err
-			}
-
-			if orderstatus.State != laststate {
-				if orderstatus.State == "BTC_SENT" {
-					msg.Text = fmt.Sprintf("(<b>%s</b>):\n\nstate change detected:\nYour order has now state <b>%s</b>\n\nState: <b>%s</b>\nUUID: %s\nBTCAmount: %s\nBTCDestAddress: %s\nBTCTransactionID: %s\nXMRNumConfirmationsRemaining: %d", orderstatus.UUID, orderstatus.State, orderstatus.State, orderstatus.UUID, orderstatus.BTCAmount, orderstatus.BTCDestAddress, orderstatus.BTCTransactionID, orderstatus.XMRNumConfirmationsRemaining)
-				} else {
-					msg.Text = fmt.Sprintf("(<b>%s</b>)\n\nstate change detected:\nYour order has now state <b>%s</b>", orderstatus.UUID, orderstatus.State)
-				}
-				bot.Send(msg)
-				laststate = orderstatus.State
-			}
-			if orderstatus.State == "BTC_SENT" {
-				// xmrto has sent the btc. we can stop the monitoring process here.
-				msg.Text = fmt.Sprintf("(<b>%s</b>)\n\nCongratulations!\n\n%s BTC have been sent to BTC destination address %s.\n\nTrack your BTC transaction ID <a href='%s/%s'>%s</a>.\n\nXMRTO order complete.\n\nGood bye.\n\nPowered by @%s via https://xmr.to", orderstatus.UUID, orderstatus.BTCAmount, orderstatus.BTCDestAddress, viper.GetString("xmrto_btc_blockexplorer"), orderstatus.BTCTransactionID, orderstatus.BTCTransactionID, viper.GetString("BOT_NAME"))
-				bot.Send(msg)
-				return nil
-			}
-		}
 	}
 }

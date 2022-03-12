@@ -207,15 +207,6 @@ if update.Message.Chat != nil {
 As you can see, this is not accurate, and is just for informational purposes to get an estimated value about the group metric. The logfile will show public and private group chatIDs and the chatID of users who private message the bot within the bot PM.
 
 
-#### #XMRTO service
-`xmrto_website: "https://xmr.to"`
-
-This is the third party application we use to make BTC payments available by using XMR transactions. This URL is their website.
-
-`xmrto_btc_blockexplorer: "https://www.blockchain.com/btc/tx"`
-
-This is a BTC blockexplorer for showing BTC TxIDs in the output messages of the xmrto command when the BTC were sent.
-
 #### #Monero Wallet RPC Settings
 `monero_rpc_daemon_url: "http://127.0.0.1:6061/json_rpc"`
 
@@ -279,10 +270,6 @@ The structure of the message of your help menu when a user invokes the `/help ba
 
 The structure of the message of your help menu when a user invokes the `/help generateqr` command
 
-`help_message_XMRTO: ""`
-
-The structure of the message of your help menu when a user invokes the `/help xmrto` command
-
 
 This was everything you can specify in your `settings.yml`. Adjust to your needs.
 
@@ -298,7 +285,6 @@ withdraw - <your private wallet address>
 balance - Show your current balance
 giveaway - <amount>
 generateqr - <amount>
-xmrto - <btcaddress> <amount>
 ```
 
 ### Installation

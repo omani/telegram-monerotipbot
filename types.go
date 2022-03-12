@@ -2,7 +2,6 @@ package monerotipbot
 
 import (
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
-	"github.com/monero-ecosystem/go-xmrto-client"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
@@ -53,13 +52,6 @@ type QRCode struct {
 	From     *tgbotapi.Message
 	ParseURI *wallet.ResponseParseURI
 	Amount   uint64
-}
-
-// XMRToOrder will always be in memory due to xmr.to's 5 minute timeout (too short worth to save it to disk). Represents an XMRTO Order that has been created
-type XMRToOrder struct {
-	Message *tgbotapi.Message
-	From    *tgbotapi.Message
-	Order   *xmrto.ResponseGetOrderStatus
 }
 
 // Account is a 1:1 copy of the Account struct in the go-monero-rpc-client

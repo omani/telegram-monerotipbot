@@ -17,8 +17,6 @@ const (
 	BALANCE
 	// GENERATEQR command for generating QR-Codes (images)
 	GENERATEQR
-	// XMRTO command for relaying xmr to btc via xmr.to service
-	XMRTO
 )
 
 var (
@@ -32,6 +30,5 @@ var (
 		WITHDRAW:   "withdraw",
 		BALANCE:    "balance",
 		GENERATEQR: "generateqr",
-		XMRTO:      "xmrto",
 	}
 )

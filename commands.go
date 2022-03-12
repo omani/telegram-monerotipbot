@@ -13,7 +13,6 @@ import (
 	"github.com/makiuchi-d/gozxing/qrcode"
 	"github.com/makiuchi-d/gozxing/qrcode/decoder"
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
-	"github.com/monero-ecosystem/go-xmrto-client"
 	"github.com/spf13/viper"
 
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
@@ -53,9 +52,6 @@ func (mtb *MoneroTipBot) parseCommandHELP() error {
 			return mtb.reply(msg)
 		case COMMANDS[GENERATEQR]:
 			msg.Text = viper.GetString("help_message_GENERATEQR")
-			return mtb.reply(msg)
-		case COMMANDS[XMRTO]:
-			msg.Text = viper.GetString("help_message_XMRTO")
 			return mtb.reply(msg)
 		default:
 			msg.Text = "Command not found."
@@ -619,169 +615,6 @@ func (mtb *MoneroTipBot) parseCommandGENERATEQR() error {
 	}
 
 	mtb.statsdIncr("qrcode_generated.counter", 1)
-
-	return nil
-}
-
-func (mtb *MoneroTipBot) parseCommandXMRTO() error {
-	// announce that the xmr.to service has shutdown!
-	msg := mtb.newReplyMessage(false)
-	msg.Text = "ATTENTION: xmr.to has shutdown its service. Read more on https://xmr.to/blog/job-done."
-	return mtb.reply(msg)
-
-	// initiate a new xmrto client
-	client := xmrto.New(&xmrto.Config{Testnet: viper.GetBool("IS_STAGENET_WALLET")})
-
-	if len(mtb.message.CommandArguments()) == 0 {
-		msg := mtb.newReplyMessage(false)
-		getorder, err := client.GetOrderParameters()
-		if err != nil {
-			msg.Text = fmt.Sprintf("XMRTO API Error: %s", err)
-			mtb.reply(msg)
-			return err
-		}
-		mtb.statsdIncr("xmrto_getorderparams.counter", 1)
-		msg.Text = fmt.Sprintf("XMR.TO Current Order Parameters\n\nPrice: %s\nLowerLimit: %s\nUpperLimit: %s\nZeroConfEnabled: %t\nZeroConfMaxAmount: %s", getorder.Price, getorder.LowerLimit, getorder.UpperLimit, getorder.ZeroConfEnabled, getorder.ZeroConfMaxAmount)
-		return mtb.reply(msg)
-	}
-
-	msg = mtb.newReplyMessage(false)
-	split := strings.SplitN(mtb.message.CommandArguments(), " ", 2)
-	if len(split) < 1 {
-		msg.Text = "Need correct amount of command arguments."
-		return mtb.reply(msg)
-	}
-
-	if len(split) != 2 {
-		msg.Text = "Need correct amount of command arguments."
-		return mtb.reply(msg)
-	}
-
-	btcaddress := split[0]
-	amountstr := split[1]
-
-	parseamount, err := strconv.ParseFloat(strings.TrimSpace(amountstr), 64)
-	if err != nil {
-		msg.Text = "Could not parse amount."
-		return mtb.reply(msg)
-	}
-
-	if parseamount <= 0 {
-		msg.Text = "Amount must be positive."
-		return mtb.reply(msg)
-	}
-
-	useraccount, err := mtb.getUserAccount()
-	if err != nil {
-		msg.Text = fmt.Sprintf("Error: %s", err)
-		return mtb.reply(msg)
-	}
-
-	if useraccount == nil {
-		msg.Text = "Oops. Something went wrong. This should not happen!"
-		return mtb.reply(msg)
-	}
-
-	// prepare message object here. will use for multiple replies in edit mode.
-	newmsg := tgbotapi.NewMessage(mtb.message.Chat.ID, "")
-
-	// let's create an order with 0.001 btc.
-	createorder, err := client.CreateOrder(&xmrto.RequestCreateOrder{
-		Amount:         parseamount,
-		AmountCurrency: "BTC",
-		BTCDestAddress: btcaddress,
-	})
-	if err != nil {
-		msg.Text = fmt.Sprintf("XMRTO API Error: %s", err)
-		return mtb.reply(msg)
-	}
-	mtb.statsdIncr("xmrto_createorder.counter", 1)
-
-	// give xmrto request time to settle down...
-	newmsg.Text = "Request sent. Waiting 3 seconds for order to reach XMRTO nodes. Stand by..."
-	chattable, err := mtb.bot.Send(newmsg)
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(time.Second * 3)
-
-	str1 := fmt.Sprintf("-- XMR.TO Reponse --\nBTCAmount: %s\nBTCDestAddress: %s\nState: %s\nUUID: %s", createorder.BTCAmount, createorder.BTCDestAddress, createorder.State, createorder.UUID)
-	str2 := fmt.Sprintf("Fetching order details from XMRTO API with secret-key: %s", createorder.UUID)
-	edit := tgbotapi.NewEditMessageText(int64(chattable.Chat.ID), chattable.MessageID, "")
-	edit.Text = fmt.Sprintf("%s\n\n%s\n\n%s", chattable.Text, str1, str2)
-	edit.ParseMode = "HTML"
-	chattable, err = mtb.bot.Send(edit)
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(time.Second * 1)
-
-	// now check the order state with the secret-key
-	// we received from xmr.to for this particular order.
-	orderstatus, err := client.GetOrderStatus(&xmrto.RequestGetOrderStatus{UUID: createorder.UUID})
-	if err != nil {
-		msg.Text = fmt.Sprintf("XMRTO API Error: %s", err)
-		return mtb.reply(msg)
-	}
-	mtb.statsdIncr("xmrto_orderstatus.counter", 1)
-
-	orderstatusxmramount, err := strconv.ParseFloat(orderstatus.XMRAmountTotal, 64)
-	if err != nil {
-		msg.Text = fmt.Sprintf("XMRTO API Error: %s", err)
-		return mtb.reply(msg)
-	}
-	ordercheckprice, err := client.GetOrderPrice(&xmrto.RequestGetOrderPrice{
-		Amount:         parseamount,
-		AmountCurrency: "BTC",
-	})
-	if err != nil {
-		msg.Text = fmt.Sprintf("XMRTO API Error: %s", err)
-		return mtb.reply(msg)
-	}
-	if useraccount.UnlockedBalance <= wallet.Float64ToXMR(orderstatusxmramount) {
-		msg.Text = fmt.Sprintf("Insufficient funds. At the current exchange rate of %s BTC per XMR (given by xmr.to), you would need at least %s XMR in your unlocked balance.", ordercheckprice.XMRPriceBTC, ordercheckprice.XMRAmountTotal)
-		return mtb.reply(msg)
-	}
-
-	out := fmt.Sprintf("%s\n\n-- XMR.TO Reponse --\nState: <b>%s</b>\nUUID: <b>%s</b>\nBTCAmount: %s\nBTCDestAddress: %s\nCreatedAT: %s\nExpiresAT: %s\nSecondsTillTimeout: %d\nXMRAmountTotal: %s XMR\nXMRPriceBTC: %s BTC\nXMRReceivingSubAddress: %s",
-		chattable.Text,
-		orderstatus.State,
-		orderstatus.UUID,
-		orderstatus.BTCAmount,
-		orderstatus.BTCDestAddress,
-		orderstatus.CreatedAT,
-		orderstatus.ExpiresAT,
-		orderstatus.SecondsTillTimeout,
-		orderstatus.XMRAmountTotal,
-		orderstatus.XMRPriceBTC,
-		orderstatus.XMRReceivingSubAddress,
-	)
-
-	out = fmt.Sprintf("%s\n\n---\nNeed to deposit %s XMR to above <i>XMRReceivingSubAddress</i> wallet to relay the requested BTC.\n\nTo complete your request I will send %s XMR from your account to the given address above. Please confirm or cancel.\n\n<b>You have less than 4 minutes to confirm this transaction.</b>\n", out, orderstatus.XMRAmountTotal, orderstatus.XMRAmountTotal)
-
-	claim := tgbotapi.NewInlineKeyboardButtonData("Send", "xmrto_tx_send")
-	cancel := tgbotapi.NewInlineKeyboardButtonData("Cancel", "xmrto_tx_cancel")
-	markup := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(claim, cancel))
-
-	edit = tgbotapi.NewEditMessageText(int64(chattable.Chat.ID), chattable.MessageID, "")
-	edit.Text = fmt.Sprintf("%s\n\n%s", edit.Text, out)
-	edit.ParseMode = "HTML"
-	edit.ReplyMarkup = &markup
-	chattable, err = mtb.bot.Send(edit)
-	if err != nil {
-		return err
-	}
-
-	mtb.statsdIncr("xmrto_tx.counter", 1)
-
-	xmrtoOrder := &XMRToOrder{
-		Message: &chattable,
-		From:    mtb.message,
-		Order:   orderstatus,
-	}
-	mtb.xmrtoOrders = append(mtb.xmrtoOrders, xmrtoOrder)
 
 	return nil
 }

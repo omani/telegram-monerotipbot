@@ -10,10 +10,6 @@ GIVEAWAY_FILE: "giveaways.json" # absolute path will also work
 BROADCAST_NOTIFICATION_INTERVAL: 10
 LOGFILE: "monerotipbot.log" # this must be set! regardless if you use logging.
 
-# XMRTO service
-xmrto_website: "https://xmr.to"
-xmrto_btc_blockexplorer: "https://www.blockchain.com/btc/tx"
-
 # Monero Wallet RPC Settings
 monero_rpc_daemon_url: "http://127.0.0.1:6061/json_rpc"
 monero_rpc_daemon_username: ''
@@ -61,13 +57,6 @@ Withdraw everything from the tip bot wallet to your own wallet address.
 Generate a QR-Code image with the desired amount and optionally a description to share with others.
 
 You can also paste a QR-Code image into this PM chat with me and I will try to decode it. This way you can make transactions by scanning QR-Codes.
-
-
-/xmrto <i>btc-address</i> <i>amount</i>
-
-Needs no further introduction. Those who know xmr.to will love this. :)
-
-Pay the world with Monero via xmr.to!
 
 
 
@@ -141,19 +130,3 @@ Example:
 
 /generateqr 10 thank you for the donation. much appreciated! :)"
 
-
-help_message_XMRTO: "/xmrto <i>btc-address</i> <i>amount</i>
-
-
-This bot implements the API of https://xmr.to and makes it possible to send BTC anywhere by sending XMR to their service.
-
-
-Specify the BTC address you want to send BTC to and the amount. The bot will start an interactive dialog and will guide you through the process.
-
-
-Pass the /xmrto command without any arguments to see the order parameters of xmr.to.
-
-
-<b>Highlight</b>:
-
-Upload a BITCOIN QR-Code with a correct URI (that is, with an amount encoded) and tag (add a caption to) the image with 'xmr.to' (without the quotes) before uploading it to the bot PM."
