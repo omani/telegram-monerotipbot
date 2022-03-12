@@ -301,9 +301,24 @@ generateqr - <amount>
 xmrto - <btcaddress> <amount>
 ```
 
-### CMD Runs
+### Installation
 
 > You can compile every main.go you see here if you want and use only the binary. But we will stick to the source code here.
+
+#### Clone repo
+```
+git clone https://github.com/monero-ecosystem/telegram-monerotipbot
+```
+
+#### Install dependencies (using golang modules)
+Install ZMQ library (eg. on Debian based systems)
+```
+sudo apt install libzmq3-dev
+```
+Now install all golang dependencies with one command:
+```
+go mod tidy
+```
 
 #### Bot
 Start the bot and specify the settings file:
