@@ -19,16 +19,14 @@ const (
 	GENERATEQR
 )
 
-var (
-	// COMMANDS defines all Telegram commands this bot has
-	COMMANDS = map[string]string{
-		START:      "start",
-		HELP:       "help",
-		TIP:        "tip",
-		SEND:       "send",
-		GIVEAWAY:   "giveaway",
-		WITHDRAW:   "withdraw",
-		BALANCE:    "balance",
-		GENERATEQR: "generateqr",
-	}
-)
+// COMMANDS defines all Telegram commands this bot has
+var COMMANDS = map[string]string{
+	START:      "start",
+	HELP:       "help",
+	TIP:        "tip",
+	SEND:       "send",
+	GIVEAWAY:   "giveaway",
+	WITHDRAW:   "withdraw",
+	BALANCE:    "balance",
+	GENERATEQR: "generateqr",
+}

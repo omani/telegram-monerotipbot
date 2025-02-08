@@ -14,12 +14,12 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
-	"github.com/spf13/viper"
-
-	monerotipbot "github.com/monero-ecosystem/telegram-monerotipbot"
+	"github.com/omani/go-monero-rpc-client/wallet"
 	zmq "github.com/pebbe/zmq4"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+
+	monerotipbot "github.com/omani/telegram-monerotipbot"
 )
 
 var (

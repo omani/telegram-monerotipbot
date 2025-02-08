@@ -2,7 +2,7 @@ telegram-monerotipbot
 ========================
 
 <p align="center">
-<img src="https://github.com/monero-ecosystem/telegram-monerotipbot/raw/master/assets/img/icon.png" alt="A Monero wallet for Telegram" width="200" />
+<img src="https://github.com/omani/telegram-monerotipbot/raw/master/assets/img/icon.png" alt="A Monero wallet for Telegram" width="200" />
 </p>
 
 A Telegram Monero tip bot written in go.
@@ -293,7 +293,7 @@ generateqr - <amount>
 
 #### Clone repo
 ```
-git clone https://github.com/monero-ecosystem/telegram-monerotipbot
+git clone https://github.com/omani/telegram-monerotipbot
 ```
 
 #### Install dependencies (using golang modules)
@@ -304,10 +304,6 @@ sudo apt install libzmq3-dev
 Now install all golang dependencies with one command:
 ```
 go mod tidy
-```
-If you are on go1.17 you can use:
-```
-go mod tidy -compat=1.17
 ```
 
 #### Bot
@@ -373,11 +369,9 @@ If you use this bot in your own group, people trust you by depositing their Mone
 * You can contribute with pull requests.
 
 ## Donations
-I love Monero (XMR) and building applications for and on top of Monero.
-
-You can make me happy by donating Monero to the following address:
+You can make me happy by donating Bitcoin to the following address:
 ```
-89woiq9b5byQ89SsUL4Bd66MNfReBrTwNEDk9GoacgESjfiGnLSZjTD5x7CcUZba4PBbE3gUJRQyLWD4Akz8554DR4Lcyoj
+bc1qgezvfp4s0xme8pdv6aaqu9ayfgnv4mejdlv3tx
 ```
 
 ## Author

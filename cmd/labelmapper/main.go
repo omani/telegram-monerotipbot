@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -19,13 +18,11 @@ import (
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
+	"github.com/omani/go-monero-rpc-client/wallet"
 	"github.com/spf13/viper"
 )
 
-var (
-	configpath string
-)
+var configpath string
 
 func main() {
 	flag.StringVar(&configpath, "c", "", "")
@@ -61,5 +58,5 @@ func main() {
 	}
 	file, _ := json.MarshalIndent(accounts, "", " ")
 
-	_ = ioutil.WriteFile("labelmap.json", file, 0644)
+	_ = os.WriteFile("labelmap.json", file, 0644)
 }

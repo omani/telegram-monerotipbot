@@ -1,7 +1,7 @@
 package monerotipbot
 
 import (
-	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
+	"github.com/omani/go-monero-rpc-client/wallet"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 

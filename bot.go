@@ -22,11 +22,10 @@ import (
 	"github.com/gabstv/httpdigest"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
-	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
+	"github.com/omani/go-monero-rpc-client/wallet"
 	zmq "github.com/pebbe/zmq4"
-	"github.com/spf13/viper"
-
 	statsd "github.com/smira/go-statsd"
+	"github.com/spf13/viper"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
@@ -43,8 +42,10 @@ type MoneroTipBot struct {
 	statsdclient *statsd.Client
 }
 
-var usernameregexp *regexp.Regexp
-var mutex sync.RWMutex
+var (
+	usernameregexp *regexp.Regexp
+	mutex          sync.RWMutex
+)
 
 // NewBot creates a new monerotipbot instance
 func NewBot(conf *Config) (*MoneroTipBot, error) {
@@ -775,7 +776,7 @@ func (mtb *MoneroTipBot) parsePhoto() error {
 	}
 
 	now := time.Now().Unix()
-	//open a file for writing
+	// open a file for writing
 	savefile, err := os.Create(fmt.Sprintf("/tmp/qrcode.jpg_%d", now))
 	if err != nil {
 		msg.Text = "Could not create image file. Try again later."
